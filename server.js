@@ -44,6 +44,21 @@ app.post('/todos', function (req, res) {
 
 })
 
+// DELETE
+
+app.delete('/todos/:id', function (req, res) {
+    const todoId = parseInt(req.params.id);
+    var matchedTodo = _.findWhere(todos, {
+        id: todoId
+    });
+    if (!matchedTodo) {
+        res.status(404).send('Asking for invalid todo with id of ' + req.params.id);
+    } else {
+        todos = _.without(todos, matchedTodo);
+        res.json(matchedTodo);
+    }
+})
+
 app.listen(PORT, function () {
     console.log('Server is running on port ' + PORT);
 })
