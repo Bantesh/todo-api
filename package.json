@@ -11,7 +11,9 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.1",
+    "crypto-js": "^4.1.1",
     "express": "^4.17.2",
+    "jsonwebtoken": "^8.5.1",
     "pg": "^4.4.1",
     "pg-hstore": "^2.3.2",
     "sequelize": "^3.5.1",
