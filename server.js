@@ -109,6 +109,19 @@ app.put('/todos/:id', (req, res) => {
         res.status(500).send();
     });
 });
+
+app.post('/users', function (req, res) {
+    var body = _.pick(req.body, 'email', 'password');
+    // body.description = body.password.trim();
+    db.user.create(body).then(function (user) {
+        res.json(user.toJSON());
+    }, function (e) {
+        return res.status(400).json(e);
+    });
+
+
+})
+
 db.sequelize.sync().then(() => {
     app.listen(PORT, function () {
         console.log('Server is running on port ' + PORT);
