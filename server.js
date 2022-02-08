@@ -1,7 +1,9 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
-var db = require('./db')
+var bcrypt = require('bcrypt');
+var db = require('./db');
+const { use } = require('bcrypt/promises');
 
 var app = express();
 
@@ -110,6 +112,14 @@ app.put('/todos/:id', (req, res) => {
     });
 });
 
+app.post('/users/login', function (req, res) {
+    var body = _.pick(req.body, 'email', 'password');
+    db.user.authenticate(body).then(function (user) {
+        res.json(user.toPublicJSON());
+    }, function () {
+        return res.status(401).send();
+    });
+})
 app.post('/users', function (req, res) {
     var body = _.pick(req.body, 'email', 'password');
     // body.description = body.password.trim();
@@ -118,8 +128,6 @@ app.post('/users', function (req, res) {
     }, function (e) {
         return res.status(400).json(e);
     });
-
-
 })
 
 db.sequelize.sync().then(() => {
