@@ -19,13 +19,40 @@ var Todo = sequelize.define('todo', {
         defaultValue: false
     }
 })
+var User = sequelize.define('user', {
+    email: Sequelize.STRING
+});
+
+Todo.belongsTo(User);
+User.hasMany(Todo);
 
 sequelize.sync(
-    // { force: true }
+    //  { force: true }
 ).then(function () {
     console.log('Everything is synced');
+    User.findById(1).then(function (user) {
+        user.getTodos({
+            where: {
+                completed: false
+            }
+        }).then(function (todos) {
+            todos.forEach(todo => {
+                console.log(todo.toJSON());
+            });
+        })
+    })
 
-
+    // User.create({
+    //     email: "b@gmail.com"
+    // }).then(function () {
+    //     return Todo.create({
+    //         description: 'Clean yard'
+    //     });
+    // }).then(function (todo) {
+    //     User.findById(1).then(function (user) {
+    //         user.addTodo(todo);
+    //     })
+    // })
 
     // Todo.create({
     //     description: 'walking my dog'

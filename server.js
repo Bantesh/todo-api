@@ -20,7 +20,9 @@ app.get('/', function (req, res) {
 
 app.get('/todos', middleware.requireAuthentication, function (req, res) {
     var queryParams = req.query;
-    var where = {};
+    var where = {
+        userId: req.user.get('id')
+    };
     if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
         where.completed = true;
     } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
@@ -38,7 +40,12 @@ app.get('/todos', middleware.requireAuthentication, function (req, res) {
 });
 app.get('/todos/:id', middleware.requireAuthentication, function (req, res) {
     const todoId = parseInt(req.params.id);
-    db.todo.findById(todoId).then(function (todo) {
+    db.todo.findOne({
+        where: {
+            id: todoId,
+            userId: req.user.get('id')
+        }
+    }).then(function (todo) {
         if (todo) {
             res.json(todo.toJSON());
         } else {
@@ -57,7 +64,12 @@ app.post('/todos', middleware.requireAuthentication, function (req, res) {
         return res.status(400).send();
     body.description = body.description.trim();
     db.todo.create(body).then(function (todo) {
-        res.json(todo.toJSON());
+        console.log(typeof req.user);
+        req.user.addTodo(todo).then(function () {
+            return todo.reload();
+        }).then(function (todo) {
+            res.json(todo.toJSON());
+        });
     }, function (e) {
         return res.status(400).json(e);
     });
@@ -71,7 +83,8 @@ app.delete('/todos/:id', middleware.requireAuthentication, function (req, res) {
     const todoId = parseInt(req.params.id);
     db.todo.destroy({
         where: {
-            id: todoId
+            id: todoId,
+            userId: req.user.get('id')
         }
     }).then((rowsDeleted) => {
         if (rowsDeleted === 0) {
@@ -98,7 +111,12 @@ app.put('/todos/:id', middleware.requireAuthentication, (req, res) => {
     if (body.hasOwnProperty('description')) {
         attributes.description = body.description
     }
-    db.todo.findById(todoId).then(function (todo) {
+    db.todo.findOne({
+        where: {
+            id: todoId,
+            userId: req.user.get('id')
+        }
+    }).then(function (todo) {
         if (todo) {
             todo.update(attributes).then(function (todo) {
                 res.json(todo.toJSON());
